@@ -1,0 +1,107 @@
+# Maintainer: signageOS <dev@signageos.io>
+# Maintainer: Andrii Guriev <bearrailgun@gmail.com>
+pkgname=wpewebkit
+pkgver=2.25.1
+pkgrel=0
+pkgdesc="Portable web rendering engine WPEWebKit"
+url="https://wpewebkit.org/"
+arch="armhf"
+license="custom"
+makedepends="
+	cmake
+	ninja
+	perl
+	ruby
+	cairo-dev
+	icu-dev
+	jpeg-dev
+	libepoxy-dev
+	libgcrypt-dev
+	libsoup-dev
+	libwebp-dev
+	atk-dev
+	harfbuzz-dev
+	at-spi2-atk-dev
+	openjpeg-dev
+	openjpeg-tools
+	woff2-dev
+	libtasn1-dev
+	libxslt-dev
+	bubblewrap
+	libseccomp-dev
+	xdg-dbus-proxy
+	gstreamer-dev
+	gst-plugins-base-dev
+	gst-plugins-bad-dev
+	gperf
+	hyphen-dev
+	libjpeg-turbo-dev
+	libnotify-dev
+	libpng-dev
+	libsecret-dev
+	libxml2-dev
+	libxt-dev
+	mesa-dev
+	pango-dev
+	paxmark
+	python2
+	sqlite-dev
+	libxkbcommon-dev
+	wayland-dev
+	"
+replaces="webkit"
+options="!check" # upstream doesn't package them in release tarballs: Tools/Scripts/run-gtk-tests: Command not found
+source="https://wpewebkit.org/releases/${pkgname}-${pkgver}.tar.xz
+	fix-openjpeg.patch
+	"
+builddir="$srcdir/wpewebkit-$pkgver"
+
+build() {
+	local _archopt=
+	case "$CARCH" in
+		# disable _FORTIFY_SOURCE to work around:
+		# cc1plus: out of memory allocating 65536 bytes after a total of 3131101184 bytes
+		x86) CXXFLAGS="$CXXFLAGS -U_FORTIFY_SOURCE";;
+		armhf|armv7|ppc64le|s390x) _archopt="-DENABLE_JIT=OFF";;
+	esac
+
+	# reduce memory usage on 32 bit
+	# https://bugs.webkit.org/show_bug.cgi?id=199272
+	export CXXFLAGS="$CXXFLAGS -g0"
+
+	mkdir build
+	cd build
+	cmake -GNinja \
+		-DPORT=GTK \
+		-DCMAKE_BUILD_TYPE=MinSizeRel \
+		-DCMAKE_SKIP_RPATH=ON \
+		-DCMAKE_INSTALL_PREFIX=/usr \
+		-DLIB_INSTALL_DIR=/usr/lib \
+		-DENABLE_GTKDOC=OFF \
+		-DENABLE_GEOLOCATION=OFF \
+		-DENABLE_PLUGIN_PROCESS_GTK2=OFF \
+		-DENABLE_SAMPLING_PROFILER=OFF \
+		-DENABLE_MINIBROWSER=ON \
+		-DUSE_WOFF2=OFF \
+		-DCMAKE_CXX_FLAGS="$CXXFLAGS" \
+		$_archopt \
+		..
+	# https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=923476
+	ninja JavaScriptCore-4-gir
+	ninja
+}
+
+check() {
+	ninja -C "$builddir"/build check
+}
+
+package() {
+	DESTDIR="$pkgdir" ninja -C "$builddir"/build install
+	# needed for JIT
+	paxmark -m "$pkgdir"/usr/libexec/webkit2gtk-4.0/WebKitWebProcess
+}
+
+sha512sums="b358bb11f7df477e5b3d6a12e2e6b41cb4e6a7274e34ce6299bf0c56044ffc7db5a834e9abf5c71d992ef41d194d30171b8be406420ffc54fe766cc811afb79f  webkitgtk-2.24.3.tar.xz
+e1537b9937af1cb936669d405993a52204cb9968b8b3161cb12a3f3f1343c260088c9490fcd7a7deeab6dbabdb5f7ce7e6cb2f857b9f0a4205aba6db2b11fb20  fix-fast-memory-disabled.patch
+d0d5e37822644cab071e33d325affd1ce5948b414f6f54d695e6b4a7bffadecd25c0df6dc1cb63e70127499f5a8da43b02286a3518b2488b5da32c622df45d97  musl-fixes.patch
+c517c012f5630ef6be5be7d9592c5e042a070f849a141859edefa7984acb98dbd0d718fe6613cd35ba3b7d8530beebcc7408fd077cd914ed335c5e524e9e746a  fix-openjpeg.patch"
