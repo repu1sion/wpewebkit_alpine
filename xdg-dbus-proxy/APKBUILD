@@ -1,0 +1,37 @@
+# Maintainer: signageOS <dev@signageos.io>
+pkgname="xdg-dbus-proxy"
+pkgver="0.1.1"
+pkgrel=0
+pkgdesc="xdg-dbus-proxy"
+url="https://github.com/flatpak/xdg-dbus-proxy"
+arch="all"
+license="LGPL-2.1-or-later"
+makedepends="autoconf autoconf-archive automake glib-dev"
+options="!check"
+subpackages="$pkgname-doc"
+source="
+    xdg-dbus-proxy-$pkgver.tar.gz::https://github.com/flatpak/xdg-dbus-proxy/archive/$pkgver.tar.gz
+    build-fix.patch
+    musl-fix
+"
+builddir="$srcdir"/$pkgname-$pkgver
+
+prepare() {
+    default_prepare
+    NOCONFIGURE=1 ./autogen.sh
+    cat "$srcdir"/musl-fix >> config.h.in
+}
+
+build() {
+    ./configure \
+        --prefix=/usr
+    make
+}
+
+package() {
+    make install DESTDIR="$pkgdir"
+}
+
+sha512sums="b91711ba53adcc30f68f94f6f7bd6def8a62ca9ab73ec64019aeb0621793b6c276c5a7885c46f8ed39122955b1cdb550bc6f06bb7b5c2d5370d699781585756c  xdg-dbus-proxy-0.1.1.tar.gz
+5960e6276daa26e96010fe7e080d7e762944e86f81f9a4d2529db73d075e2a72fe34eb11a8b44b961fe4fe8e17845f0abb5c8935de58f76dfc9435aabf7b95a1  build-fix.patch
+f9c4546863c6bee7a73e48d13edfbcd979a2b56142f309e44b9fb127f94850296b9f8a4f37b32efcc348750b49fadd719a66c52fa3a8034cfc5c255f27894f9f  musl-fix"

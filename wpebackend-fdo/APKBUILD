@@ -1,0 +1,31 @@
+# Maintainer: signageOS <dev@signageos.io>
+pkgname="wpebackend-fdo"
+pkgver="1.3.1"
+pkgrel=0
+pkgdesc="wpebackend-fdo"
+url="https://wpewebkit.org"
+arch="armhf"
+license="custom"
+depends="wayland-libs-server mesa libxkbcommon libwpe"
+makedepends="mesa-dev libxkbcommon-dev glib-dev wayland-dev ninja"
+options="!check"
+source="https://wpewebkit.org/releases/${pkgname}-${pkgver}.tar.xz"
+builddir="$srcdir"/$pkgname-$pkgver
+
+build() {
+    cd "$builddir"
+    cmake \
+        -DCMAKE_BUILD_TYPE=RelWithDebInfo \
+        -DWPE_INCLUDE_DIRS=/usr/include/wpe-1.0 \
+        -GNinja
+    ninja
+}
+
+package() {
+    cd "$builddir"
+    DESTDIR="$pkgdir" ninja install
+    mv "$pkgdir"/usr/local/* "$pkgdir"/usr
+    rmdir "$pkgdir"/usr/local
+}
+
+sha512sums="9e933c8f8c55b0113535278c42c41d029856a045fd23b2d08d1ee4885bb4d44f798a5d4cd5e68ac168311aba94f4f8e56d73b2c1bf57361e37095266c04fce57  wpebackend-fdo-1.3.1.tar.xz"
