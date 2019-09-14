@@ -5,7 +5,7 @@ pkgver=2.25.1
 pkgrel=0
 pkgdesc="Portable web rendering engine WPEWebKit"
 url="https://wpewebkit.org/"
-arch="armhf"
+arch="armhf armv7"
 license="custom"
 makedepends="
 	cmake
@@ -76,6 +76,7 @@ build() {
 		-DPORT=WPE \
 		-DCMAKE_BUILD_TYPE=MinSizeRel \
 		-DWPE_INCLUDE_DIRS=/usr/include/wpe-1.0 \
+		-DWPEBACKEND_FDO_INCLUDE_DIRS=/usr/include/wpe-fdo-1.0 \
 		-DCMAKE_SKIP_RPATH=ON \
 		-DCMAKE_INSTALL_PREFIX=/usr \
 		-DLIB_INSTALL_DIR=/usr/lib \
