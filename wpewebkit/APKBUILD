@@ -13,6 +13,7 @@ makedepends="
 	perl
 	ruby
 	cairo-dev
+	libintl
 	icu-dev
 	jpeg-dev
 	libepoxy-dev
@@ -48,6 +49,7 @@ makedepends="
 	sqlite-dev
 	libxkbcommon-dev
 	wayland-dev
+	wayland-protocols
 	"
 replaces="webkit"
 options="!check" # upstream doesn't package them in release tarballs: Tools/Scripts/run-gtk-tests: Command not found
