@@ -30,7 +30,6 @@ makedepends="
 	libxslt-dev
 	bubblewrap
 	libseccomp-dev
-	xdg-dbus-proxy
 	gstreamer-dev
 	gst-plugins-base-dev
 	gst-plugins-bad-dev
@@ -50,6 +49,9 @@ makedepends="
 	libxkbcommon-dev
 	wayland-dev
 	wayland-protocols
+	xdg-dbus-proxy
+	libwpe
+	wpebackend-fdo
 	"
 replaces="webkit"
 options="!check" # upstream doesn't package them in release tarballs: Tools/Scripts/run-gtk-tests: Command not found
@@ -87,7 +89,7 @@ build() {
 		-DENABLE_MINIBROWSER=ON \
 		-DUSE_WOFF2=OFF \
 		-DCMAKE_CXX_FLAGS="$CXXFLAGS" \
-		-DCMAKE_LD_FLAGS="$LDFLAGS" \
+                -DCMAKE_SHARED_LINKER_FLAGS="$LDFLAGS" \
 		$_archopt \
 		..
 	# https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=923476
