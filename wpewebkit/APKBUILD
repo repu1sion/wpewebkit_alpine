@@ -30,6 +30,7 @@ makedepends="
 	libxslt-dev
 	bubblewrap
 	libseccomp-dev
+	xdg-dbus-proxy
 	gstreamer-dev
 	gst-plugins-base-dev
 	gst-plugins-bad-dev
@@ -49,7 +50,6 @@ makedepends="
 	libxkbcommon-dev
 	wayland-dev
 	wayland-protocols
-	xdg-dbus-proxy
 	libwpe
 	wpebackend-fdo
 	"
@@ -61,18 +61,10 @@ source="https://wpewebkit.org/releases/${pkgname}-${pkgver}.tar.xz
 builddir="$srcdir/wpewebkit-$pkgver"
 
 build() {
-	local _archopt=
-	case "$CARCH" in
-		# disable _FORTIFY_SOURCE to work around:
-		# cc1plus: out of memory allocating 65536 bytes after a total of 3131101184 bytes
-		x86) CXXFLAGS="$CXXFLAGS -U_FORTIFY_SOURCE";;
-		armhf|armv7|ppc64le|s390x) _archopt="-DENABLE_JIT=OFF";;
-	esac
-
 	# reduce memory usage on 32 bit
 	# https://bugs.webkit.org/show_bug.cgi?id=199272
 	export CXXFLAGS="$CXXFLAGS -g0"
-	export LDFLAGS="$LDFLAGS -lintl"
+	export LDLIBS="$LDLIBS -lintl"
 
 	mkdir build
 	cd build
@@ -89,8 +81,8 @@ build() {
 		-DENABLE_MINIBROWSER=ON \
 		-DUSE_WOFF2=OFF \
 		-DCMAKE_CXX_FLAGS="$CXXFLAGS" \
-                -DCMAKE_SHARED_LINKER_FLAGS="$LDFLAGS" \
-		$_archopt \
+		-DCMAKE_CXX_STANDARD_LIBRARIES="$LDLIBS" \
+		-DENABLE_JIT=OFF \
 		..
 	# https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=923476
 	# ninja JavaScriptCore-4-gir
