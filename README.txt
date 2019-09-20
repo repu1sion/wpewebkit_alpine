@@ -18,6 +18,9 @@ sudo docker build ./build/
 5. run docker container.
 sudo docker run -it 82f4029375ba  sh
 
+(raspberry:)
+sudo docker run -it 0355bee82d1c  sh
+
 
 [DL git with APKBUILD files on alpine machine:]
 --------------------------------------------------------------------------------
@@ -70,6 +73,7 @@ Then update list of packets.
 11. checksum
 # abuild checksum
 (abuild -F checksum)
+(abuild-keygen -a -i && abuild -F checksum)
 
 12. build package itself
 # abuild -r
