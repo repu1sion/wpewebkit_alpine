@@ -1,0 +1,12 @@
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -19,6 +19,9 @@
+     message(STATUS "The CMake build type is: ${CMAKE_BUILD_TYPE}")
+ endif ()
+ 
++SET(CMAKE_CXX_FLAGS "-O1 -g0")
++SET(CMAKE_C_FLAGS "-O1 -g0")
++
+ set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/Source/cmake")
+ 
+ set(ENABLE_WEBCORE ON)
