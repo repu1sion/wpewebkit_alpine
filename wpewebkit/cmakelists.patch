@@ -4,8 +4,8 @@
      message(STATUS "The CMake build type is: ${CMAKE_BUILD_TYPE}")
  endif ()
  
-+SET(CMAKE_CXX_FLAGS "-O1 -g0")
-+SET(CMAKE_C_FLAGS "-O1 -g0")
++SET(CMAKE_CXX_FLAGS_DEBUG "-O1 -g0")
++SET(CMAKE_C_FLAGS_DEBUG "-O1 -g0")
 +
  set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/Source/cmake")
  
