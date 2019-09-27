@@ -71,7 +71,7 @@ build() {
 	cd build
 	cmake -GNinja \
 		-DPORT=WPE \
-		-DCMAKE_BUILD_TYPE=Debug \
+		-DCMAKE_BUILD_TYPE=MinSizeRel \
 		-DWPE_INCLUDE_DIRS=/usr/include/wpe-1.0 \
 		-DWPEBACKEND_FDO_INCLUDE_DIRS=/usr/include/wpe-fdo-1.0 \
 		-DCMAKE_SKIP_RPATH=ON \
@@ -86,6 +86,8 @@ build() {
 		..
 	# https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=923476
 	# ninja JavaScriptCore-4-gir
+	awk '/LowLevelInterpreter.cpp.o.d/ {f=1; print; next} f {sub("-Os","-O1",$0);f=0} 1' build.ninja > 1
+	mv 1 build.ninja
 	ninja
 }
 
