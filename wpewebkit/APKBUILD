@@ -56,8 +56,8 @@ makedepends="
 replaces="webkit"
 options="!check" # upstream doesn't package them in release tarballs: Tools/Scripts/run-gtk-tests: Command not found
 source="https://wpewebkit.org/releases/${pkgname}-${pkgver}.tar.xz
+	cmakelists.patch
 	fix-fast-memory-disabled.patch
-	musl-fixes.patch
 	fix-openjpeg.patch
 	"
 builddir="$srcdir/wpewebkit-$pkgver"
@@ -65,14 +65,13 @@ builddir="$srcdir/wpewebkit-$pkgver"
 build() {
 	# reduce memory usage on 32 bit
 	# https://bugs.webkit.org/show_bug.cgi?id=199272
-	export CXXFLAGS="$CXXFLAGS -g0"
 	export LDLIBS="$LDLIBS -lintl"
 
 	mkdir build
 	cd build
 	cmake -GNinja \
 		-DPORT=WPE \
-		-DCMAKE_BUILD_TYPE=MinSizeRel \
+		-DCMAKE_BUILD_TYPE=Debug \
 		-DWPE_INCLUDE_DIRS=/usr/include/wpe-1.0 \
 		-DWPEBACKEND_FDO_INCLUDE_DIRS=/usr/include/wpe-fdo-1.0 \
 		-DCMAKE_SKIP_RPATH=ON \
@@ -82,7 +81,6 @@ build() {
 		-DENABLE_SAMPLING_PROFILER=OFF \
 		-DENABLE_MINIBROWSER=ON \
 		-DUSE_WOFF2=OFF \
-		-DCMAKE_CXX_FLAGS="$CXXFLAGS" \
 		-DCMAKE_CXX_STANDARD_LIBRARIES="$LDLIBS" \
 		-DENABLE_JIT=OFF \
 		..
@@ -103,6 +101,6 @@ package() {
 }
 
 sha512sums="0b416b164cc9547a974e47be1b43658083642f93970a66f003676154e4c980ef0cbc6533f70e3f6de5b4d128da12cf9ef1717e7de270bd83bb87142ea9720c3c  wpewebkit-2.25.1.tar.xz
+8d88263f33f610876ddea70d9d446539e65e316360eef4f11313280be001052bbe2e13dd778fb335f0945abaea2db1be8113af120716fc8326d1aff394737c0d  cmakelists.patch
 e1537b9937af1cb936669d405993a52204cb9968b8b3161cb12a3f3f1343c260088c9490fcd7a7deeab6dbabdb5f7ce7e6cb2f857b9f0a4205aba6db2b11fb20  fix-fast-memory-disabled.patch
-d0d5e37822644cab071e33d325affd1ce5948b414f6f54d695e6b4a7bffadecd25c0df6dc1cb63e70127499f5a8da43b02286a3518b2488b5da32c622df45d97  musl-fixes.patch
 c517c012f5630ef6be5be7d9592c5e042a070f849a141859edefa7984acb98dbd0d718fe6613cd35ba3b7d8530beebcc7408fd077cd914ed335c5e524e9e746a  fix-openjpeg.patch"
