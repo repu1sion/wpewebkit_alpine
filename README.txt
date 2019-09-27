@@ -21,6 +21,7 @@ sudo docker run -it 82f4029375ba  sh
 (raspberry:)
 sudo docker run -it 0355bee82d1c  sh
 
+(cat /etc/apk/arch	- shows arch for running docker image)
 
 [DL git with APKBUILD files on alpine machine:]
 --------------------------------------------------------------------------------
@@ -52,6 +53,8 @@ Then update list of packets.
 5. edit /etc/abuild.conf
 # sudo vim /etc/abuild.conf
   export JOBS=4
+
+  edit CXXFLAGS - remove -Os
 
 6. To use 'abuild -r' command to install dependency packages automatically.
 # sudo addgroup <yourusername> abuild
@@ -88,6 +91,16 @@ or
 # apk add --repository /root/packages/git/ libwpe               - really working command for wpe packet
 # apk add --repository /root/packages/git/ wpebackend-fdo
 # apk add --repository /root/packages/git/ xdg-dbus-proxy
+
+
+# apk add --repository /root/packages/wpewebkit_alpine/ libwpe
+
+
+
+P.S. Replacing LowLevelInterpreter flag -Os with -O1
+awk '/LowLevelInterpreter.cpp.o.d/ {f=1; print; next} f {sub("-Os","-O1",$0);f=0} 1' build.ninja > 1
+mv 1 build.ninja
+
 
 
 
