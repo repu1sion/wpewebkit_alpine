@@ -1,0 +1,32 @@
+# Maintainer: signageOS <dev@signageos.io>
+pkgname="cog"
+pkgver="0.3.91"
+pkgrel=0
+pkgdesc="cog"
+url="https://github.com/Igalia/cog"
+arch="armhf armv7"
+license="custom"
+depends="wpewebkit libwpe wpebackend-fdo glib"
+makedepends="glib-dev cmake libsoup-dev"
+options="!check"
+_commitid="1f60cc164cc9fadfff42298a56a28c2808e7550f"
+source="
+    $pkgname-$pkgver.tar.gz::https://github.com/Igalia/cog/archive/$_commitid.tar.gz
+    cmake.patch
+"
+builddir="$srcdir"/$pkgname-$_commitid
+
+build() {
+    cd "$builddir"
+    cmake . && make
+}
+
+package() {
+    cd "$builddir"
+    make DESTDIR="$pkgdir" install
+    mv "$pkgdir"/usr/local/* "$pkgdir"/usr
+    rmdir "$pkgdir"/usr/local
+}
+
+sha512sums="6b576dd4f751d29edadc2e74e7ce3e7aa6f7f026713ca2dff29c3371b962ef8990ea4a8e4d15f32764b9eb0ce3f1025c31947846a623ce982aa90eb197f9c90b  cog-0.3.91.tar.gz
+be0def21e3058e154fa10f995e126f779322e5688330f87b50153dbde5438a0ef10865dac78fb7b43e02a5d6ad7b63d8cc15285929badbd6bdba9036421cb511  cmake.patch"
