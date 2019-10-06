@@ -1,0 +1,103 @@
+TIPS:
+----------------------------------
+- use ldd to see all symbols and libs are found
+ldd /usr/local/lib/libWPEBackend-rdk.so
+
+- copy pkgconfig files *.pc to /usr/lib/pkgconfig
+it helps to find deps for cmake
+
+- don't install mesa-dev or libepoxy-dev - it will overwrite all bcm egl libraries and *.pc files.
+
+- start with clean docker container before building everything
+
+
+1. Install prereqs and raspberry pi userland drivers
+-----
+apk add git vim cmake ninja libxkbcommon-dev
+apk add raspberrypi raspberrypi-libs raspberrypi-dev
+
+2. cp pkgconfig files
+-----
+cp /opt/vc/lib/pkgconfig/*.pc /usr/lib/pkgconfig/
+(cp -r /opt/vc/lib/*.so /usr/lib)	- could help
+
+3. remove -lvchostif in egl.pc and brcmegl.pc in /usr/lib/pkgconfig/
+
+4. Build libwpe
+-----
+wget https://wpewebkit.org/releases/libwpe-1.3.1.tar.xz
+tar xvf libwpe-1.3.1.tar.xz
+cd libwpe-1.3.1
+cmake -DCMAKE_BUILD_TYPE=MinSizeRel -DCMAKE_INSTALL_PREFIX=/usr -DEGL_INCLUDE_DIRS=/opt/vc/include -GNinja
+ninja
+ninja install
+ldconfig
+
+5. Build wpebackend-rdk
+-----
+apk add libinput libinput-dev eudev-dev
+
+git clone https://github.com/WebPlatformForEmbedded/WPEBackend-rdk.git
+cd WPEBackend-rdk/
+cmake -DCMAKE_BUILD_TYPE=MinSizeRel -DWPE_INCLUDE_DIRS=/usr/include/wpe-1.0 -DWPE_LIBRARIES=/usr/lib -DUSE_BACKEND_BCM_RPI=ON -DBCM_HOST_INCLUDE_DIRS=/opt/vc/include -DEGL_INCLUDE_DIRS=/opt/vc/include -DEGL_LIBRARIES=/opt/vc/lib -DBCM_HOST_LIBRARIES=/opt/vc/lib/ -DBCM_HOST_INCLUDE_DIRS=/opt/vc/include -DCMAKE_CXX_STANDARD_LIBRARIES="$LDLIBS -lwpe-1.0"
+
+make
+make install
+
+
+6. install prereqs
+-----
+apk add ruby cairo-dev icu-dev libepoxy libgcrypt-dev libsoup-dev libwebp-dev atk-dev harfbuzz-dev at-spi2-atk-dev openjpeg-dev openjpeg-tools woff2-dev libtasn1-dev libxslt-dev bubblewrap libseccomp-dev gstreamer-dev gst-plugins-base-dev gst-plugins-bad-dev gperf autoconf autoconf-archive automake
+
+7. install libepoxy-dev manually
+-----
+apk fetch libepoxy-dev
+tar zxvf libepoxy-dev-1.5.3-r0.apk
+cd usr/include
+cp -r epoxy /usr/include
+cd ..
+cp -r lib /usr
+
+8. xdg-dbus-proxy
+-----
+wget https://github.com/flatpak/xdg-dbus-proxy/archive/0.1.1.tar.gz
+tar zxvf 0.1.1.tar.gz
+cd xdg-dbus-proxy-0.1.1/
+wget https://git.alpinelinux.org/aports/plain/community/xdg-dbus-proxy/musl-fix.patch
+patch -p1 < musl-fix.patch
+./autogen.sh
+wget https://patch-diff.githubusercontent.com/raw/flatpak/xdg-dbus-proxy/pull/9.patch
+patch -p1 < 9.patch
+./autogen.sh
+make
+make install
+
+
+9. build wpewebkit
+-----
+apk add wayland-protocols
+
+wget https://wpewebkit.org/releases/wpewebkit-2.25.1.tar.xz
+tar xvf wpewebkit-2.25.1.tar.xz
+cd wpewebkit-2.25.1/
+
+apply openjpeg patch:
+patch -p1 < fix-openjpeg.patch
+
+Comment out all lines in Source/cmake/FindWayland.cmake  and Source/cmake/FindWPEBackend-fdo.cmake
+(Source/cmake/FindWaylandProtocols.cmake)
+
+Tools/wpe/backends/CMakeLists.txt 	- comment out fdo and all FDO* variables.
+Tools/MiniBrowser/wpe/CMakeLists.txt	- here too
+
+cmake -DPORT=WPE -DCMAKE_BUILD_TYPE=MinSizeRel -DWPE_INCLUDE_DIRS=/usr/include/wpe-1.0 -DENABLE_JIT=OFF -DENABLE_SAMPLING_PROFILER=OFF -DENABLE_GEOLOCATION=OFF -DUSE_WOFF2=OFF -DENABLE_MINIBROWSER=ON -DCMAKE_CXX_FLAGS="$CXXFLAGS -g0" -GNinja
+
+
+
+
+
+
+
+
+
+
